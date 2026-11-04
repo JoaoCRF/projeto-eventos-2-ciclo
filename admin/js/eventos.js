@@ -9,6 +9,14 @@ const eventsController = {
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/[\s_-]+/g, '-')
         .replace(/^-+|-+$/g, '');
+            .toString()
+            .normalize('NFD') // Separa os acentos das letras
+            .replace(/[\u0300-\u036f]/g, '') // Remove os acentos
+            .toLowerCase() // Converte para minúsculas
+            .trim() // Remove espaços do início e do fim
+            .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+            .replace(/[\s_-]+/g, '-') // Substitui espaços e underscores por hífens
+            .replace(/^-+|-+$/g, ''); // Remove hífens do começo e do fim
     },
     templateItem: (item) => {
         return `
@@ -55,6 +63,22 @@ const eventsController = {
         const descricao = document.querySelector("#campo-descricao").value
         const responsavel = document.querySelector("#campo-organizador").value
         const slug = eventsController.slugify(nome)
+    getFormData: () => {
+        const nome = document.querySelector("#campo-titulo").value;
+        if(nome.length < 3) {
+            return alert("O nome deve ter pelo menos 3 caracteres")
+        }
+        const categoria_id = document.querySelector("#campo-categoria").value;
+        const data = document.querySelector("#campo-data").value;
+        const horario = document.querySelector("#campo-horario").value;
+        const local = document.querySelector("#campo-local").value;
+        const endereco = document.querySelector("#campo-endereco").value;
+        const vagas_totais = document.querySelector("#campo-vagas-totais").value;
+        const vagas_restantes = document.querySelector("#campo-vagas-restantes").value;
+        const destaque = document.querySelector("#campo-destaque").checked;
+        const descricao = document.querySelector("#campo-descricao").value;
+        const responsavel = document.querySelector("#campo-organizador").value;
+        const slug = eventsController.slugify(nome);
 
         return {
             nome,
@@ -73,6 +97,7 @@ const eventsController = {
     },
     bindEventButton: () => {
         document .querySelector("#salvar-evento").addEventListener("click", async () => {
+        document.querySelector("#salvar-evento").addEventListener("click", async () => {
             const data = eventsController.getFormData()
             console.log("data", data)
 
@@ -84,6 +109,17 @@ const eventsController = {
         })
     },
     populateEventTables: async () => {
+            console.log("event", event)
+            eventsController.populateEventTable()
+
+            if(event.status === 200) {
+                alert(`O evento foi inserido com sucesso!`)
+            } else {
+                alert(`Houve um erro ao inserir o evento`)
+            }
+        })
+    },
+    populateEventTable: async () => {
         document.querySelector("#events").innerHTML = ""
         const events = await eventsController.list()
         
@@ -97,6 +133,7 @@ const eventsController = {
         eventsController.mountCategories()
         eventsController.bindEventButton()
         eventsController.populateEventTables()
+        eventsController.populateEventTable()
     }
 }
 
