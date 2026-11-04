@@ -1,4 +1,15 @@
 const eventsController = {
+    slugify: (text) => {
+        return text
+            .toString()
+            .normalize('NFD') // Separa os acentos das letras
+            .replace(/[\u0300-\u036f]/g, '') // Remove os acentos
+            .toLowerCase() // Converte para minúsculas
+            .trim() // Remove espaços do início e do fim
+            .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+            .replace(/[\s_-]+/g, '-') // Substitui espaços e underscores por hífens
+            .replace(/^-+|-+$/g, ''); // Remove hífens do começo e do fim
+    },
     templateItem: (item) => {
         return `
             <tr>
@@ -31,7 +42,56 @@ const eventsController = {
 
         document.querySelector("#campo-categoria").innerHTML = template
     },
-    init: async () => {
+    getFormData: () => {
+        const nome = document.querySelector("#campo-titulo").value;
+        if(nome.length < 3) {
+            return alert("O nome deve ter pelo menos 3 caracteres")
+        }
+        const categoria_id = document.querySelector("#campo-categoria").value;
+        const data = document.querySelector("#campo-data").value;
+        const horario = document.querySelector("#campo-horario").value;
+        const local = document.querySelector("#campo-local").value;
+        const endereco = document.querySelector("#campo-endereco").value;
+        const vagas_totais = document.querySelector("#campo-vagas-totais").value;
+        const vagas_restantes = document.querySelector("#campo-vagas-restantes").value;
+        const destaque = document.querySelector("#campo-destaque").checked;
+        const descricao = document.querySelector("#campo-descricao").value;
+        const responsavel = document.querySelector("#campo-organizador").value;
+        const slug = eventsController.slugify(nome);
+
+        return {
+            nome,
+            categoria_id,
+            data,
+            horario,
+            local,
+            endereco,
+            vagas_totais,
+            vagas_restantes,
+            destaque,
+            descricao,
+            responsavel,
+            slug
+        }
+    },
+    bindEventButton: () => {
+        document.querySelector("#salvar-evento").addEventListener("click", async () => {
+            const data = eventsController.getFormData()
+            console.log("data", data)
+
+            const event = await supabaseClient.from("eventos").insert(data).select()
+            console.log("event", event)
+            eventsController.populateEventTable()
+
+            if(event.status === 200) {
+                alert(`O evento foi inserido com sucesso!`)
+            } else {
+                alert(`Houve um erro ao inserir o evento`)
+            }
+        })
+    },
+    populateEventTable: async () => {
+        document.querySelector("#events").innerHTML = ""
         const events = await eventsController.list()
         
         const template = events.map(item => {
@@ -39,8 +99,11 @@ const eventsController = {
         }).join("")
 
         document.querySelector("#events").innerHTML = template
-
+    },
+    init: async () => {
         eventsController.mountCategories()
+        eventsController.bindEventButton()
+        eventsController.populateEventTable()
     }
 }
 
