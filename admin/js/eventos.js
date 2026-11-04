@@ -1,14 +1,6 @@
 const eventsController = {
     slugify: (text) => {
         return text
-        .toString()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '');
             .toString()
             .normalize('NFD') // Separa os acentos das letras
             .replace(/[\u0300-\u036f]/g, '') // Remove os acentos
@@ -50,19 +42,6 @@ const eventsController = {
 
         document.querySelector("#campo-categoria").innerHTML = template
     },
-    getFormData: async () => {
-        const nome = document.querySelector("#campo-titulo").value
-        const categoria_id = document.querySelector("#campo-categoria").value
-        const data = document.querySelector("#campo-data").value
-        const horario = document.querySelector("#campo-horario").value
-        const local = document.querySelector("#campo-local").value
-        const endereco = document.querySelector("#campo-endereco").value
-        const vagas_totais = document.querySelector("#campo-vagas-totais").value
-        const vagas_restantes = document.querySelector("#campo-vagas-restantes").value
-        const destaque = document.querySelector("#campo-destaque").checked
-        const descricao = document.querySelector("#campo-descricao").value
-        const responsavel = document.querySelector("#campo-organizador").value
-        const slug = eventsController.slugify(nome)
     getFormData: () => {
         const nome = document.querySelector("#campo-titulo").value;
         if(nome.length < 3) {
@@ -96,19 +75,11 @@ const eventsController = {
         }
     },
     bindEventButton: () => {
-        document .querySelector("#salvar-evento").addEventListener("click", async () => {
         document.querySelector("#salvar-evento").addEventListener("click", async () => {
             const data = eventsController.getFormData()
             console.log("data", data)
 
             const event = await supabaseClient.from("eventos").insert(data).select()
-            console.log("event", evento)
-            eventsController.populateEventTables()
-
-            
-        })
-    },
-    populateEventTables: async () => {
             console.log("event", event)
             eventsController.populateEventTable()
 
@@ -132,7 +103,6 @@ const eventsController = {
     init: async () => {
         eventsController.mountCategories()
         eventsController.bindEventButton()
-        eventsController.populateEventTables()
         eventsController.populateEventTable()
     }
 }
