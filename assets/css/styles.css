@@ -931,3 +931,16 @@ body {
         align-items: flex-start;
     }
 }
+
+.error {
+    color: #f00;
+    display: none;
+}
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: block;
+}
